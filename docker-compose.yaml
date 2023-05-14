@@ -1,0 +1,46 @@
+version: '3.3'
+services:
+  db-notebook:
+    image: mysql:5.7
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: 'db'
+      MYSQL_USER: ${USER}
+      MYSQL_PASSWORD: ${USER_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASSWORD}
+    ports:
+      - 3306:3306
+    expose:
+      - 3306
+    volumes:
+      - my-db-notebook:/var/lib/mysql
+
+  webserver-notebook:
+    image: nginx:alpine
+    container_name: webserver-notebook
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - "91:80"
+
+#  webserver-notebook:
+#    image: nginx:alpine
+#    container_name: webserver-notebook
+#    working_dir: /application
+#    volumes:
+#      - .:/application
+#      - ./phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+#    ports:
+#      - "91:80"
+
+  notebook-php-fpm:
+    image: bitnami/php-fpm:8.2.4
+    container_name: notebook-php-fpm
+    working_dir: /application
+    volumes:
+      - .:/application
+      - ./phpdocker/php-ini-override.ini:/opt/bitnami/php/etc/php.ini
+volumes:
+  my-db-notebook:
